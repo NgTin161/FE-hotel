@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
-import * as signalR from '@microsoft/signalr';
-import { Link, useParams } from 'react-router-dom';
-import { Button, Card, Checkbox, Dropdown, Flex, Input, InputNumber, Menu, Rate, message } from 'antd';
+import { Link, useLocation, useParams } from 'react-router-dom';
+import { Button, Card, Checkbox, Dropdown, Flex, Input, InputNumber, Menu, Rate, Select, message } from 'antd';
 import { DatePicker, Space } from 'antd';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -14,15 +13,20 @@ import { MdOutlineEmail } from "react-icons/md";
 import { FaRegClock, FaPhoneAlt } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
 import SpinComponents from '../Components/Spin';
-import { UserOutlined } from '@ant-design/icons';
+import { SearchOutlined, UserOutlined } from '@ant-design/icons';
 import SlidesReview from '../Components/SlidesReview';
 import RoomTypesTable from '../Components/RoomTypesTable';
-
+import moment from 'moment';
+import { toast } from 'react-toastify';
+import { Option } from 'antd/es/mentions';
 dayjs.extend(customParseFormat);
 const { RangePicker } = DatePicker;
+const dateFormat = 'DD/MM/YYYY';
+const urlDateFormat = 'YYYY-MM-DD';
 
 const Details = () => {
-    const { id: hoteld } = useParams();
+    const [position, setPosition] = useState('end');
+    const { id: hotelId } = useParams();
     const [hotelDetail, setHotelDetail] = useState();
 
 
@@ -30,22 +34,16 @@ const Details = () => {
     const [children, setChildren] = useState(0);
     const [rooms, setRooms] = useState(1);
 
-
-    const [checkinDate, setCheckIn] = useState();
-    const [checkoutDate, setCheckOut] = useState();
-    const dateFormat = 'DD/MM/YYYY';
-
-    const [tempAdults, setTempAdults] = useState(adults);
-    const [tempChildren, setTempChildren] = useState(children);
-    const [tempRooms, setTempRooms] = useState(rooms);
-
+    const [checkinDate, setCheckInDate] = useState(null);
+    const [checkoutDate, setCheckOutDate] = useState(null);
 
     const handleDateChange = (dates, dateStrings) => {
-        if (dateStrings[0] && dateStrings[1]) {
-            const fromDate = dayjs(dateStrings[0], dateFormat).format('YYYY-MM-DD');
-            const toDate = dayjs(dateStrings[1], dateFormat).format('YYYY-MM-DD');
-            setCheckIn(fromDate);
-            setCheckOut(toDate);
+        if (dates) {
+            setCheckInDate(dayjs(dateStrings[0], dateFormat).format(urlDateFormat));
+            setCheckOutDate(dayjs(dateStrings[1], dateFormat).format(urlDateFormat));
+        } else {
+            setCheckInDate(null);
+            setCheckOutDate(null);
         }
     };
 
@@ -53,88 +51,31 @@ const Details = () => {
         return current && current < dayjs().endOf('day');
     };
 
-    const handleDone = () => {
-        setAdults(tempAdults);
-        setChildren(tempChildren);
-        setRooms(tempRooms);
-        // Perform any other actions needed on submission
+
+    const handleSearch = () => {
+
+        const numberOfChildren = typeof children === 'number' ? children : 0;
+
+        const fetchNewRoom = async () => {
+            try {
+
+                const response = await axiosJson.get(`/RoomTypes/getavailableroom?hotelId=${hotelId}&checkinDate=${checkinDate}&checkoutDate=${checkoutDate}&numberOfAdult=${adults}&numberOfChildren=${numberOfChildren}&numberOfRooms=${rooms}`);
+
+                console.log(hotelId, checkinDate, checkoutDate, adults, numberOfChildren, rooms);
+                console.log('new room', response.data);
+                setRoomTypes(response.data); // Cập nhật state với dữ liệu mới
+                toast.success('Cập nhật thành công');
+
+            } catch (error) {
+                console.log('lỗi', error)
+                toast.error('Cập nhật thất bại');
+            }
+        };
+
+        fetchNewRoom();
     };
 
 
-
-
-
-    const handleSearchRoom = () => {
-
-        // const queryParams = {
-        //     province: province,
-        //     checkinDate,
-        //     checkoutDate,
-        //     numberOfPeople: (adults + children),
-        //     numberOfRooms: rooms,
-        // };
-
-        // // Tạo một mảng các phần tử trong query string
-        // const queryString = Object.keys(queryParams)
-        //     .map(key => {
-        //         if (key === 'fromDate' || key === 'toDate') {
-        //             return queryParams[key] ? `${encodeURIComponent(key)}=${encodeURIComponent(queryParams[key])}` : '';
-        //         }
-        //         // Thay dấu cách bằng dấu '+', không cần encode
-        //         const value = queryParams[key] ? queryParams[key].toString().replace(/ /g, '+') : '';
-        //         return value ? `${encodeURIComponent(key)}=${value}` : '';
-        //     })
-        //     .filter(Boolean) // Loại bỏ các phần tử rỗng trong mảng
-        //     .join('&');
-
-    };
-
-    const menu = (
-        <Menu style={{ display: 'flow', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Menu.Item key="1">
-                <div style={{ display: 'flex' }}>
-                    <label>Người lớn</label>
-                    <InputNumber
-                        min={1}
-                        max={10}
-                        value={tempAdults}
-                        style={{ marginLeft: 30 }}
-                        onChange={value => setTempAdults(value)}
-                    />
-                </div>
-            </Menu.Item>
-            <Menu.Item key="2">
-                <div style={{ display: 'flex' }}>
-                    <label>Trẻ em</label>
-                    <InputNumber
-                        min={0}
-                        max={10}
-                        value={tempChildren}
-                        style={{ marginLeft: 50 }}
-                        onChange={value => setTempChildren(value)}
-                    />
-                </div>
-            </Menu.Item>
-            <Menu.Item key="3">
-                <div style={{ display: 'flex' }}>
-                    <label>Phòng</label>
-                    <InputNumber
-                        min={1}
-                        max={10}
-                        value={tempRooms}
-                        style={{ marginLeft: 50 }}
-                        onChange={value => setTempRooms(value)}
-                    />
-                </div>
-            </Menu.Item>
-            <Menu.Item key="4">
-                <Button type="primary" style={{ width: '100%' }} onClick={handleDone}>Xong</Button>
-            </Menu.Item>
-        </Menu>
-    );
-
-    const [room, setRoom] = useState();
-    const [messageApi, contextHolder] = message.useMessage()
     const formatTime = (time) => time.slice(0, 5);
 
     useEffect(() => {
@@ -144,13 +85,10 @@ const Details = () => {
         const fetchHotelDetail = async () => {
 
             try {
-                const fetch = await axiosJson.get(`/Hotels/${hoteld}`)
+                const fetch = await axiosJson.get(`/Hotels/${hotelId}`)
                 console.log(fetch.data);
                 setHotelDetail(fetch.data)
-                // messageApi.open({
-                //     type: 'success',
-                //     content: 'Thành công',
-                // });
+
             } catch (error) {
                 console.error('Đã xảy ra lỗi khi gửi yêu cầu:', error);
             }
@@ -159,48 +97,67 @@ const Details = () => {
     }, []);
 
     const [roomTypes, setRoomTypes] = useState();
+    const location = useLocation();
     useEffect(() => {
-        // Lấy query params từ URL hiện tại
-        const queryString = window.location.search;
-        const urlParams = new URLSearchParams(queryString);
-
-    
+        const urlParams = new URLSearchParams(location.search);
         const checkIn = urlParams.get('checkinDate');
         const checkOut = urlParams.get('checkoutDate');
         const numberOfAdults = urlParams.get('numberOfAdults');
+        setAdults(numberOfAdults)
         const numberOfChildren = urlParams.get('numberOfChildren');
+        setChildren(numberOfChildren)
         const numberOfRooms = urlParams.get('numberOfRooms');
+        setRooms(numberOfRooms);
+        if (checkIn) setCheckInDate(checkIn);
+        if (checkOut) setCheckOutDate(checkOut);
 
         if (checkIn && checkOut && numberOfChildren && numberOfAdults && numberOfRooms) {
-            // Tạo object chứa dữ liệu để gửi đi
-            // const requestData = {
-            //     province: province,
-            //     checkinDate: checkIn,
-            //     checkinDate: checkOut,
-            //     numberOfPeople: parseInt(numberOfPeople),
-            //     numberOfRooms: parseInt(numberOfRooms)
-            // };
-
-            // URL endpoint
             const fetchRoomTypes = async () => {
                 try {
-                    const fetch = await axiosJson.get(`/RoomTypes/getavailableroom?hotelId=${hoteld}&checkinDate=${checkIn}&checkoutDate=${checkOut}&numberOfAdults=${numberOfAdults}&numberOfChildren=${numberOfChildren}&numberOfRooms=${numberOfRooms}`)
-                    console.log('roomtype', fetch.data);
-                    setRoomTypes(fetch.data)
-                    messageApi.open({
-                        type: 'success',
-                        content: 'Thành công',
+                    const response = await axiosJson.get(`/RoomTypes/getavailableroom`, {
+                        params: {
+                            hotelId: hotelId,
+                            checkinDate: checkIn,
+                            checkoutDate: checkOut,
+                            numberOfAdults: numberOfAdults,
+                            numberOfChildren: numberOfChildren,
+                            numberOfRooms: numberOfRooms
+                        }
                     });
+                    console.log('roomtype', response.data);
+                    setRoomTypes(response.data);
+
                 } catch (error) {
                     console.error('Đã xảy ra lỗi khi gửi yêu cầu:', error);
                 }
             }
             fetchRoomTypes();
         }
-    }, []);
+    }, [location.search, hotelId]);
 
 
 
+
+    const [showDropdown, setShowDropdown] = useState(false);
+    const handleAdultsChange = (value) => {
+        setAdults(value);
+    };
+
+    const handleChildrenChange = (value) => {
+        setChildren(value);
+    };
+
+    const handleRoomsChange = (value) => {
+        setRooms(value);
+    };
+
+    const handleDropdownVisibleChange = (visible) => {
+        setShowDropdown(visible);
+    };
+
+    const handleDone = () => {
+        setShowDropdown(false); // Đóng dropdown khi hoàn thành nhập liệu
+    };
 
 
     return (
@@ -244,7 +201,7 @@ const Details = () => {
                         marginTop: '20px'
                     }}>
                         <div dangerouslySetInnerHTML={{ __html: hotelDetail.description }} />
-                        <h3>Hotel Services</h3>
+                        <h3>Dịch vụ khách sạn</h3>
                         <ul>
                             <li>Accepts Children: {hotelDetail.acceptChildren ? 'Yes' : 'No'}</li>
                             <li>Accepts Pets: {hotelDetail.acceptPet ? 'Yes' : 'No'}</li>
@@ -260,11 +217,17 @@ const Details = () => {
                             fontSize: '10px',
                             marginTop: '20px'
                         }}>
-                        <h4>Phòng trống</h4>
-                        <div className='container' style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <div className='containerSearch' style={{ width: '750px' }}>
+
+                        <h3>Phòng trống</h3>
+                        <div className='container' style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '70px' }}>
+                            <div className='containerSearch' style={{ width: '800px' }}>
                                 <div style={{ marginTop: 20 }}>
                                     <RangePicker
+                                        value={
+                                            checkinDate && checkoutDate
+                                                ? [dayjs(checkinDate, urlDateFormat), dayjs(checkoutDate, urlDateFormat)]
+                                                : null
+                                        }
                                         style={{ paddingLeft: 30 }}
                                         format={dateFormat}
                                         placeholder={['Ngày đến', 'Ngày đi']}
@@ -273,22 +236,63 @@ const Details = () => {
                                     />
                                 </div>
                                 <div style={{ marginTop: 20 }}>
-                                    <Dropdown overlay={menu} trigger={['click']}>
-                                        <Button style={{}} icon={<UserOutlined />}>
-                                            {adults} người lớn - {children} trẻ em - {rooms} phòng
+                                    <Select
+                                        style={{ width: 280 }}
+                                        value={`${adults} người lớn - ${children} trẻ em - ${rooms} phòng`}
+                                        open={showDropdown}
+                                        onDropdownVisibleChange={handleDropdownVisibleChange}
+                                        dropdownRender={() => (
+                                            <div style={{ padding: 8 }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                                                    <label style={{ flex: 1 }}>Người lớn:</label>
+                                                    <InputNumber
+                                                        min={1}
+                                                        max={30}
+                                                        defaultValue={adults}
+                                                        value={adults}
+                                                        onChange={handleAdultsChange}
+                                                        style={{ flex: 1 }}
+                                                    />
+                                                </div>
+                                                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                                                    <label style={{ flex: 1 }}>Trẻ em:</label>
+                                                    <InputNumber
+                                                        min={0}
+                                                        max={30}
+                                                        value={children}
+                                                        onChange={handleChildrenChange}
+                                                        style={{ flex: 1 }}
+                                                    />
+                                                </div>
+                                                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                                                    <label style={{ flex: 1 }}>Phòng:</label>
+                                                    <InputNumber
+                                                        min={1}
+                                                        max={15}
+                                                        value={rooms}
+                                                        onChange={handleRoomsChange}
+                                                        style={{ flex: 1 }}
+                                                    />
+                                                </div>
+                                                <Button type="primary" style={{ width: '100%' }} onClick={handleDone}>Xong</Button>
+                                            </div>
+                                        )}
+                                    >
+                                        <Button style={{}} icon={<UserOutlined />} onClick={() => setShowDropdown(true)}>
+                                            {`${adults} người lớn - ${children} trẻ em - ${rooms} phòng`}
                                         </Button>
-                                    </Dropdown>
+                                    </Select>
                                 </div>
-                                <div className="icon-container">
-                                    <Button type="primary" onClick={handleSearchRoom}>
-
-                                        <i style={{ color: 'white' }} className="fa-solid fa-magnifying-glass"></i>
-
+                                <div style={{ marginTop: 20 }}>
+                                    <Button onClick={handleSearch} type="primary" icon={<SearchOutlined />} iconPosition={position}>
+                                        Thay đổi tìm kiếm
                                     </Button>
                                 </div>
                             </div>
                         </div>
-                        <RoomTypesTable roomTypes={roomTypes} />
+                        <div style={{ marginTop: '20px' }}>
+                            <RoomTypesTable roomTypes={roomTypes} />
+                        </div>
                     </Card>
                     <hr></hr>
                     <h3> Đánh giá</h3>

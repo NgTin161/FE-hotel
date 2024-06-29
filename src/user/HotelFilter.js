@@ -2,24 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
 import { AutoComplete, DatePicker, Dropdown, InputNumber, Menu, Select, Table, Slider, Checkbox, Button as AntButton, Row, Col, message, Button, Typography, Form, Card } from 'antd';
-import { GlobalOutlined, UserOutlined } from '@ant-design/icons';
+import { GlobalOutlined, SearchOutlined, UserOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
-
+import { Option } from 'antd/es/mentions';
 import moment from 'moment';
 import Map from '../Components/Map';
-import ListFilter from './ListFilter';
 import { axiosJson } from '../axios/axiosCustomize';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import queryString from 'query-string';
 import SpinComponents from '../Components/Spin';
-
-
-const dateFormat = 'DD-MM-YYYY';
+import { CiLocationOn } from 'react-icons/ci';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(customParseFormat);
 const { RangePicker } = DatePicker;
-
-dayjs.locale('vi');
-
+const dateFormat = 'DD/MM/YYYY';
+const urlDateFormat = 'YYYY-MM-DD';
 const HotelFilter = () => {
     const navigate = useNavigate();
 
@@ -30,33 +28,18 @@ const HotelFilter = () => {
     const [dataFromApi, setDataFromApi] = useState([]);
 
 
-    const [checkinDate, setCheckIn] = useState();
-    const [checkoutDate, setCheckOut] = useState();
+
+    const [checkinDate, setCheckInDate] = useState(null);
+    const [checkoutDate, setCheckOutDate] = useState(null);
     const [province, setProvince] = useState(null);
     // Temporary state for dropdown menu
-    const [tempAdults, setTempAdults] = useState(adults);
-    const [tempChildren, setTempChildren] = useState(children);
-    const [tempRooms, setTempRooms] = useState(rooms);
 
 
-    const [provinceParam, setProvinceParam] = useState();
-    const [checkInParam, setCheckInParam] = useState();
-    const [checkOutParam, setCheckOutParam] = useState();
-    const [numberOfRoomParam, setNumberOfRoomParam] = useState();
-    const [numberOfAdultsParam, setNumberOfAdultsParam] = useState();
-    const [numberOfChilderenParam, setNumberOfChildrenParam] = useState()
-    const handleAutoCompleteSearch = (searchText) => {
-        const filteredOptions = dataFromApi.filter(item =>
-            item.name.toLowerCase().includes(searchText.toLowerCase())
-        );
+    // const [checkInParam, setCheckInParam] = useState();
+    // const [checkOutParam, setCheckOutParam] = useState();
 
-        setOptions(filteredOptions.map(item => ({ value: item.full_name, label: item.full_name })));
-    };
 
-    const handleAutoCompleteSelect = (value) => {
-        setProvince(value);
-        // console.log('AutoComplete selected:', value);
-    };
+
 
     const [hotelData, setHotelData] = useState([]);
     useEffect(() => {
@@ -69,21 +52,20 @@ const HotelFilter = () => {
 
                 const queryString = window.location.search;
                 const urlParams = new URLSearchParams(queryString);
-
-                // Lấy các giá trị từ query params
                 const province = urlParams.get('province');
                 setProvince(province.replace('+', ' '))
+
                 const checkIn = urlParams.get('checkinDate');
                 const checkOut = urlParams.get('checkoutDate');
-                setCheckInParam(checkIn);
-                setCheckOutParam(checkOut);
+                setCheckInDate(checkIn);
+                setCheckOutDate(checkOut);
 
                 const numberOfAdults = urlParams.get('numberOfAdults');
-                setNumberOfAdultsParam(numberOfAdults);
+                setAdults(numberOfAdults);
                 const numberOfChildren = urlParams.get('numberOfChildren');
-                setNumberOfChildrenParam(numberOfChildren);
+                setChildren(numberOfChildren);
                 const numberOfRooms = urlParams.get('numberOfRooms');
-                setNumberOfRoomParam(numberOfRooms);
+                setRooms(numberOfRooms);
                 console.log('Province:', province);
                 console.log('Checkin Date:', checkIn);
                 console.log('Checkout Date:', checkOut);
@@ -105,113 +87,47 @@ const HotelFilter = () => {
 
 
 
+    const handleDateChange = (dates, dateStrings) => {
+        if (dates) {
+            setCheckInDate(dayjs(dateStrings[0], dateFormat).format(urlDateFormat));
+            setCheckOutDate(dayjs(dateStrings[1], dateFormat).format(urlDateFormat));
+        } else {
+            setCheckInDate(null);
+            setCheckOutDate(null);
+        }
+    };
 
     const disabledDate = (current) => {
         return current && current < dayjs().endOf('day');
     };
 
-    const handleDateChange = (dates, dateStrings) => {
-        if (dateStrings[0] && dateStrings[1]) {
-            const fromDate = moment(dateStrings[0], dateFormat).format('YYYY-MM-DD');
-            const toDate = moment(dateStrings[1], dateFormat).format('YYYY-MM-DD');
-            setCheckIn(fromDate);
-            setCheckOut(toDate);
-        }
+
+
+    const handleSearch = () => {
+        // Đảm bảo numberOfChildren là số và không phải undefined
+        const numberOfChildren = typeof children === 'number' ? children : 0;
+        console.log('numberOfChildren:', numberOfChildren);
+
+        const queryParams = {
+            province: province,
+            checkinDate: checkinDate,
+            checkoutDate: checkoutDate,
+            numberOfAdults: adults,
+            numberOfChildren: numberOfChildren,
+            numberOfRooms: rooms,
+        };
+
+        // Tạo query string từ queryParams
+        const queryString = Object.keys(queryParams)
+            .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(queryParams[key])}`)
+            .join('&');
+
+        const url = `/filter?${queryString}`;
+        console.log(url);
+
+        // Mở trang trong một tab mới
+        window.open(url, '_blank');
     };
-
-    const handleResetDates = () => {
-        setCheckIn(null);
-        setCheckOut(null);
-    };
-    const handleDone = () => {
-        setAdults(tempAdults);
-        setChildren(tempChildren);
-        setRooms(tempRooms);
-    };
-
-
-
-    const handleInputNumberClick = e => {
-        // Prevent Dropdown from closing when clicking on InputNumber
-        e.stopPropagation();
-    };
-
-
-    const menu = (
-        <Menu style={{ display: 'flow', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Menu.Item key="1">
-                <div style={{ display: 'flex' }}>
-                    <label>Người lớn</label>
-                    <InputNumber
-                        min={1}
-                        max={10}
-                        value={tempAdults}
-                        style={{ marginLeft: 30 }}
-                        onChange={value => setTempAdults(value)}
-                        // onPressEnter={() => { }}
-                        onClick={handleInputNumberClick}
-                        changeOnWheel
-                    />
-                </div>
-            </Menu.Item>
-            <Menu.Item key="2">
-                <div style={{ display: 'flex' }}>
-                    <label>Trẻ em</label>
-                    <InputNumber
-                        min={0}
-                        max={10}
-                        value={tempChildren}
-                        style={{ marginLeft: 50 }}
-                        onChange={value => setTempChildren(value)}
-                        // onPressEnter={() => { }}
-                        onClick={handleInputNumberClick}
-                        changeOnWheel
-                    />
-                </div>
-            </Menu.Item>
-            <Menu.Item key="3">
-                <div style={{ display: 'flex' }}>
-                    <label>Phòng</label>
-                    <InputNumber
-                        min={1}
-                        max={10}
-                        value={tempRooms}
-                        style={{ marginLeft: 50 }}
-                        onChange={value => setTempRooms(value)}
-                        // onPressEnter={() => { }}
-                        onClick={handleInputNumberClick}
-                        changeOnWheel
-                    />
-                </div>
-            </Menu.Item>
-            <Menu.Item key="4">
-                <Button type="primary" style={{ width: '100%' }} onClick={handleDone}>Xong</Button>
-            </Menu.Item>
-        </Menu>
-    )
-
-    // const handleSearch = () => {
-    //     // Đảm bảo numberOfChildren là số và không phải undefined
-    //     const numberOfChildren = typeof children === 'number' ? children : 0;
-    //     console.log('numberOfChildren:', numberOfChildren);
-
-    //     const queryParams = {
-    //         province: province,
-    //         checkinDate: checkinDate,
-    //         checkoutDate: checkoutDate,
-    //         numberOfAdults: adults,
-    //         numberOfChildren: numberOfChildren,
-    //         numberOfRooms: rooms,
-    //     };
-
-    //     // Tạo query string từ queryParams
-    //     const queryString = Object.keys(queryParams)
-    //         .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(queryParams[key])}`)
-    //         .join('&');
-
-    //     console.log(`/filter?${queryString}`);
-    //     navigate(`/filter?${queryString}`); // Navigate to '/filter' with the generated query string
-    // };
 
 
     const [priceRange, setPriceRange] = useState([100000, 2000000]);
@@ -255,23 +171,74 @@ const HotelFilter = () => {
     };
 
 
+
+    const [showDropdown, setShowDropdown] = useState(false);
+
+
+    const handleSelectChange = (value, option) => {
+
+        setProvince(option.label);
+    };
+
+    const handleAdultsChange = (value) => {
+        setAdults(value);
+    };
+
+    const handleChildrenChange = (value) => {
+        setChildren(value);
+    };
+
+    const handleRoomsChange = (value) => {
+        setRooms(value);
+    };
+
+    const handleDropdownVisibleChange = (visible) => {
+        setShowDropdown(visible);
+    };
+
+    const handleDone = () => {
+        setShowDropdown(false); // Đóng dropdown khi hoàn thành nhập liệu
+    };
+    const [loading, setLoading] = useState(false);
     return (
         <>
             <div className='row' style={{ top: '-60px' }}>
-                <div className='containerSearch' style={{ width: '950px' }}>
+                <div className='containerSearch' style={{ width: '910px' }}>
                     <div style={{ marginTop: 20 }}>
-                        <AutoComplete
-                            defaultValue={province}
-                            options={options}
-                            onSelect={handleAutoCompleteSelect}
-                            onSearch={handleAutoCompleteSearch}
-                            style={{ width: 200, borderRadius: '40px' }}
-                            placeholder={<span style={{ fontWeight: 'normal', color: 'gray' }}>Bạn muốn đến đâu?</span>}
-                            prefix={<GlobalOutlined />}
-                        />
+                        <Select
+                            value={province}
+                            showSearch
+                            style={{ width: 250 }}
+                            placeholder={
+                                <div style={{ display: 'inline-flex', alignItems: 'center', fontWeight: 'normal', color: 'gray' }}>
+                                    <CiLocationOn style={{ fontSize: 20, marginTop: 5, marginRight: 8 }} />
+                                    Bạn muốn đến đâu ?
+                                </div>
+                            }
+                            optionFilterProp="label"
+                            loading={loading}
+                            filterOption={(input, option) =>
+                                option.props.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                            }
+                            onChange={handleSelectChange} // Xử lý khi người dùng chọn một lựa chọn
+                        >
+                            {dataFromApi.map((province) => (
+                                <Option key={province.id} value={province.full_name} label={province.full_name}>
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <CiLocationOn style={{ marginRight: 8 }} />
+                                        <span>{province.full_name}</span>
+                                    </div>
+                                </Option>
+                            ))}
+                        </Select>
                     </div>
                     <div style={{ marginTop: 20 }}>
                         <RangePicker
+                            value={
+                                checkinDate && checkoutDate
+                                    ? [dayjs(checkinDate, urlDateFormat), dayjs(checkoutDate, urlDateFormat)]
+                                    : null
+                            }
                             style={{ paddingLeft: 30 }}
                             format={dateFormat}
                             placeholder={['Ngày đến', 'Ngày đi']}
@@ -280,16 +247,58 @@ const HotelFilter = () => {
                         />
                     </div>
                     <div style={{ marginTop: 20 }}>
-                        <Dropdown overlay={menu} trigger={['click']}>
-                            <AntButton icon={<UserOutlined />}>
-                                {adults} người lớn - {children} trẻ em - {rooms} phòng
-                            </AntButton>
-                        </Dropdown>
+                        <Select
+                            style={{ width: 250 }}
+                            value={`${adults} người lớn - ${children} trẻ em - ${rooms} phòng`}
+                            open={showDropdown}
+                            onDropdownVisibleChange={handleDropdownVisibleChange}
+                            dropdownRender={() => (
+                                <div style={{ padding: 8 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                                        <label style={{ flex: 1 }}>Người lớn:</label>
+                                        <InputNumber
+                                            min={1}
+                                            max={30}
+                                            defaultValue={adults}
+                                            value={adults}
+                                            onChange={handleAdultsChange}
+                                            style={{ flex: 1 }}
+                                            changeOnWheel
+                                        />
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                                        <label style={{ flex: 1 }}>Trẻ em:</label>
+                                        <InputNumber
+                                            min={0}
+                                            max={30}
+                                            value={children}
+                                            onChange={handleChildrenChange}
+                                            style={{ flex: 1 }}
+                                            changeOnWheel
+                                        />
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                                        <label style={{ flex: 1 }}>Phòng:</label>
+                                        <InputNumber
+                                            min={1}
+                                            max={15}
+                                            value={rooms}
+                                            onChange={handleRoomsChange}
+                                            style={{ flex: 1 }}
+                                            changeOnWheel
+                                        />
+                                    </div>
+                                    <Button type="primary" style={{ width: '100%' }} onClick={handleDone}>Xong</Button>
+                                </div>
+                            )}
+                        >
+                            <Button style={{}} icon={<UserOutlined />} onClick={() => setShowDropdown(true)}>
+                                {`${adults} người lớn - ${children} trẻ em - ${rooms} phòng`}
+                            </Button>
+                        </Select>
                     </div>
-                    <div className="icon-container">
-                        <AntButton type="primary">
-                            <FontAwesomeIcon icon={faSearch} style={{ color: 'white' }} />
-                        </AntButton>
+                    <div style={{ marginTop: 15 }}>
+                        <Button style={{ width: 40, height: 40 }} onClick={handleSearch} type="primary" shape="circle" icon={<SearchOutlined />} />
                     </div>
                 </div>
             </div>
@@ -340,8 +349,8 @@ const HotelFilter = () => {
                 <div className="filter-listCard">
                     <h3>
                         Có {filteredHotels.length} khách sạn từ ngày{' '}
-                        {checkInParam ? moment(checkInParam).format('DD-MM-YY') : 'không có ngày'} đến{' '}
-                        {checkOutParam ? moment(checkOutParam).format('DD-MM-YY') : 'không có ngày'}
+                        {checkinDate ? moment(checkinDate).format('DD-MM-YY') : 'không có ngày'} đến{' '}
+                        {checkoutDate ? moment(checkoutDate).format('DD-MM-YY') : 'không có ngày'}
                     </h3>
 
                     {filteredHotels?.length > 0 ? (
@@ -351,11 +360,11 @@ const HotelFilter = () => {
                                     to={{
                                         pathname: `/detail/${hotel.id}`,
                                         search: queryString.stringify({
-                                            checkinDate: checkInParam,
-                                            checkoutDate: checkOutParam,
-                                            numberOfAdults: numberOfAdultsParam,
-                                            numberOfChildren: numberOfChilderenParam,
-                                            numberOfRooms: numberOfRoomParam
+                                            checkinDate: checkinDate,
+                                            checkoutDate: checkoutDate,
+                                            numberOfAdults: adults,
+                                            numberOfChildren: children,
+                                            numberOfRooms: rooms
                                             // Add more query parameters as needed
                                         }),
                                     }}

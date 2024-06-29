@@ -1,36 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarDays, faPerson, faHouse } from '@fortawesome/free-solid-svg-icons';
-import { InputNumber, DatePicker, Dropdown, Menu, Button, AutoComplete } from 'antd';
+import { InputNumber, DatePicker, Dropdown, Menu, Button, AutoComplete, Select } from 'antd';
 import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate from react-router-dom
 
 import dayjs from 'dayjs';
 import axios from 'axios';
-import { GlobalOutlined, UserOutlined } from '@ant-design/icons';
+import { GlobalOutlined, SearchOutlined, UserOutlined } from '@ant-design/icons';
 import { useRef } from 'react';
-
-dayjs.locale('vi');
-
+import { Option } from 'antd/es/mentions';
+import { CiLocationOn } from "react-icons/ci";
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(customParseFormat);
 const { RangePicker } = DatePicker;
+const dateFormat = 'DD/MM/YYYY';
+const urlDateFormat = 'YYYY-MM-DD';
+
 
 const HomePage = () => {
     const navigate = useNavigate(); // Use useNavigate hook to access navigate function
 
-
+    const [province, setProvince] = useState();
     const [adults, setAdults] = useState(2);
     const [children, setChildren] = useState(0);
     const [rooms, setRooms] = useState(1);
     const [options, setOptions] = useState([]);
     const [dataFromApi, setDataFromApi] = useState([]);
 
+    const [checkinDate, setCheckInDate] = useState(null);
+    const [checkoutDate, setCheckOutDate] = useState(null);
 
-    const [checkinDate, setCheckIn] = useState();
-    const [checkoutDate, setCheckOut] = useState();
-    const [province, setProvince] = useState(null);
+
     // Temporary state for dropdown menu
-    const [tempAdults, setTempAdults] = useState(adults);
-    const [tempChildren, setTempChildren] = useState(children);
-    const [tempRooms, setTempRooms] = useState(rooms);
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -47,22 +49,16 @@ const HomePage = () => {
         fetchData();
     }, []);
 
-    const handleDone = () => {
-        setAdults(tempAdults);
-        setChildren(tempChildren);
-        setRooms(tempRooms);
-        // Perform any other actions needed on submission
-    };
 
-    const dateFormat = 'DD/MM/YYYY';
+
 
     const handleDateChange = (dates, dateStrings) => {
-        if (dateStrings[0] && dateStrings[1]) {
-            const fromDate = dayjs(dateStrings[0], dateFormat).format('YYYY-MM-DD');
-            const toDate = dayjs(dateStrings[1], dateFormat).format('YYYY-MM-DD');
-            setCheckIn(fromDate);
-            setCheckOut(toDate);
-            // Additional logic for sending fromDate and toDate to backend
+        if (dates) {
+            setCheckInDate(dayjs(dateStrings[0], dateFormat).format(urlDateFormat));
+            setCheckOutDate(dayjs(dateStrings[1], dateFormat).format(urlDateFormat));
+        } else {
+            setCheckInDate(null);
+            setCheckOutDate(null);
         }
     };
 
@@ -70,65 +66,8 @@ const HomePage = () => {
         return current && current < dayjs().endOf('day');
     };
 
-    const handleInputNumberClick = e => {
-        // Prevent Dropdown from closing when clicking on InputNumber
-        e.stopPropagation();
-    };
 
 
-
-    const menu = (
-        <Menu style={{ display: 'flow', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Menu.Item key="1">
-                <div style={{ display: 'flex' }}>
-                    <label>Người lớn</label>
-                    <InputNumber
-                        min={1}
-                        max={10}
-                        value={tempAdults}
-                        style={{ marginLeft: 30 }}
-                        onChange={value => setTempAdults(value)}
-                        // onPressEnter={() => { }}
-                        onClick={handleInputNumberClick}
-                        changeOnWheel
-                    />
-                </div>
-            </Menu.Item>
-            <Menu.Item key="2">
-                <div style={{ display: 'flex' }}>
-                    <label>Trẻ em</label>
-                    <InputNumber
-                        min={0}
-                        max={10}
-                        value={tempChildren}
-                        style={{ marginLeft: 50 }}
-                        onChange={value => setTempChildren(value)}
-                        // onPressEnter={() => { }}
-                        onClick={handleInputNumberClick}
-                        changeOnWheel
-                    />
-                </div>
-            </Menu.Item>
-            <Menu.Item key="3">
-                <div style={{ display: 'flex' }}>
-                    <label>Phòng</label>
-                    <InputNumber
-                        min={1}
-                        max={10}
-                        value={tempRooms}
-                        style={{ marginLeft: 50 }}
-                        onChange={value => setTempRooms(value)}
-                        // onPressEnter={() => { }}
-                        onClick={handleInputNumberClick}
-                        changeOnWheel
-                    />
-                </div>
-            </Menu.Item>
-            <Menu.Item key="4">
-                <Button type="primary" style={{ width: '100%' }} onClick={handleDone}>Xong</Button>
-            </Menu.Item>
-        </Menu>
-    )
     const handleSearch = () => {
         // Đảm bảo numberOfChildren là số và không phải undefined
         const numberOfChildren = typeof children === 'number' ? children : 0;
@@ -152,19 +91,39 @@ const HomePage = () => {
         navigate(`/filter?${queryString}`); // Navigate to '/filter' with the generated query string
     };
 
-    const handleAutoCompleteSearch = (searchText) => {
-        const filteredOptions = dataFromApi.filter(item =>
-            item.name.toLowerCase().includes(searchText.toLowerCase())
-        );
 
-        setOptions(filteredOptions.map(item => ({ value: item.full_name, label: item.full_name })));
+
+
+
+    const [showDropdown, setShowDropdown] = useState(false);
+
+
+    const handleSelectChange = (value, option) => {
+
+        setProvince(option.label);
     };
 
-    const handleAutoCompleteSelect = (value) => {
-        setProvince(value);
-        // console.log('AutoComplete selected:', value);
+    const handleAdultsChange = (value) => {
+        setAdults(value);
     };
 
+    const handleChildrenChange = (value) => {
+        setChildren(value);
+    };
+
+    const handleRoomsChange = (value) => {
+        setRooms(value);
+    };
+
+    const handleDropdownVisibleChange = (visible) => {
+        setShowDropdown(visible);
+    };
+
+    const handleDone = () => {
+        setShowDropdown(false); // Đóng dropdown khi hoàn thành nhập liệu
+    };
+
+    const [loading, setLoading] = useState(false);
     return (
         <div className='Container-Onlet'>
             <div className='Onlet-body'>
@@ -181,20 +140,42 @@ const HomePage = () => {
                         <p style={{ color: 'white', marginTop: 20 }}>Tiện ích tức thời  - Không mất phí</p>
                     </span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ display: 'inline-block', alignItems: 'baseline', justifyContent: 'center' }}>
                     <div className='containerSearch'>
                         <div style={{ marginTop: 20 }}>
-                            <AutoComplete
-                                style={{ width: 200, borderRadius: '40px' }}
-                                options={options}
-                                onSelect={handleAutoCompleteSelect}
-                                onSearch={handleAutoCompleteSearch}
-                                placeholder={<span style={{ fontWeight: 'normal', color: 'gray' }}>Bạn muốn đến đâu?</span>}
-                                prefix={<GlobalOutlined />}
-                            />
+                            <Select
+                                showSearch
+                                style={{ width: 250 }}
+                                placeholder={
+                                    <div style={{ display: 'inline-flex', alignItems: 'center', fontWeight: 'normal', color: 'gray' }}>
+                                        <CiLocationOn style={{ fontSize: 20, marginTop: 5, marginRight: 8 }} />
+                                        Bạn muốn đến đâu ?
+                                    </div>
+                                }
+                                optionFilterProp="label"
+                                loading={loading}
+                                filterOption={(input, option) =>
+                                    option.props.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                }
+                                onChange={handleSelectChange} // Xử lý khi người dùng chọn một lựa chọn
+                            >
+                                {dataFromApi.map((province) => (
+                                    <Option key={province.id} value={province.full_name} label={province.full_name}>
+                                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                                            <CiLocationOn style={{ marginRight: 8 }} />
+                                            <span>{province.full_name}</span>
+                                        </div>
+                                    </Option>
+                                ))}
+                            </Select>
                         </div>
                         <div style={{ marginTop: 20 }}>
                             <RangePicker
+                                value={
+                                    checkinDate && checkoutDate
+                                        ? [dayjs(checkinDate, urlDateFormat), dayjs(checkoutDate, urlDateFormat)]
+                                        : null
+                                }
                                 style={{ paddingLeft: 30 }}
                                 format={dateFormat}
                                 placeholder={['Ngày đến', 'Ngày đi']}
@@ -203,22 +184,59 @@ const HomePage = () => {
                             />
                         </div>
                         <div style={{ marginTop: 20 }}>
-                            <Dropdown overlay={menu} trigger={['click']}>
-                                <Button style={{}} icon={<UserOutlined />}>
-                                    {adults} người lớn - {children} trẻ em - {rooms} phòng
+                            <Select
+                                style={{ width: 250 }}
+                                value={`${adults} người lớn - ${children} trẻ em - ${rooms} phòng`}
+                                open={showDropdown}
+                                onDropdownVisibleChange={handleDropdownVisibleChange}
+                                dropdownRender={() => (
+                                    <div style={{ padding: 8 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                                            <label style={{ flex: 1 }}>Người lớn:</label>
+                                            <InputNumber
+                                                min={1}
+                                                max={30}
+                                                defaultValue={adults}
+                                                value={adults}
+                                                onChange={handleAdultsChange}
+                                                style={{ flex: 1 }}
+                                            />
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                                            <label style={{ flex: 1 }}>Trẻ em:</label>
+                                            <InputNumber
+                                                min={0}
+                                                max={30}
+                                                value={children}
+                                                onChange={handleChildrenChange}
+                                                style={{ flex: 1 }}
+                                            />
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                                            <label style={{ flex: 1 }}>Phòng:</label>
+                                            <InputNumber
+                                                min={1}
+                                                max={15}
+                                                value={rooms}
+                                                onChange={handleRoomsChange}
+                                                style={{ flex: 1 }}
+                                            />
+                                        </div>
+                                        <Button type="primary" style={{ width: '100%' }} onClick={handleDone}>Xong</Button>
+                                    </div>
+                                )}
+                            >
+                                <Button style={{}} icon={<UserOutlined />} onClick={() => setShowDropdown(true)}>
+                                    {`${adults} người lớn - ${children} trẻ em - ${rooms} phòng`}
                                 </Button>
-                            </Dropdown>
+                            </Select>
                         </div>
-                        <div className="icon-container">
-                            <Button type="primary" onClick={handleSearch}>
-
-                                <i style={{ color: 'white' }} className="fa-solid fa-magnifying-glass"></i>
-
-                            </Button>
+                        <div style={{ marginTop: 15 }}>
+                            <Button style={{ width: 40, height: 40 }} onClick={handleSearch} type="primary" shape="circle" icon={<SearchOutlined />} />
                         </div>
                     </div>
                 </div>
-            </div>
+            </div >
             <div className='Onlet-list'>
 
 

@@ -1,6 +1,6 @@
 /* CSS HEADER */
 @import '~antd/dist/reset.css';
-
+@import 'react-toastify/dist/ReactToastify.css';
 .Container-header {
     width: 100vw;
     height: 500px;

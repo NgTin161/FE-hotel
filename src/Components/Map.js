@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from '@goongmaps/goong-js';
 import '@goongmaps/goong-js/dist/goong-js.css';
 import { Modal, Button } from 'react-bootstrap';
+import SpinComponents from './Spin';
 
 const Map = (props) => {
   const { hotelData } = props;
@@ -108,7 +109,7 @@ const Map = (props) => {
           </div>
         </>
       ) : (
-        <p style={{ textAlign: 'center' }}>Không có dữ liệu để hiển thị bản đồ.</p>
+        <SpinComponents />
       )}
 
       <Modal show={showModal} onHide={closeModal} size="xl">

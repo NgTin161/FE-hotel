@@ -1,3 +1,16 @@
+
+.ant-select-arrow {
+    display: none; /* Ẩn mũi tên xuống mặc định */
+  }
+.select-icon {
+  position: absolute;
+  left: 12px; /* Điều chỉnh khoảng cách từ icon đến viền trái của Select */
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px; /* Điều chỉnh kích thước của icon */
+  color: #ccc; /* Màu sắc của icon */
+}
+
 .Container-header {
     display: grid;
     flex-direction: column;
@@ -187,9 +200,9 @@
     text-align: center;
     height: 65px;
     top: 50px;
-    margin: 0px;
+    margin-left: 12vw;
     background-color: white;
-    width: 930px;
+    width: 950px;
     margin-top: 40px;
 }
 

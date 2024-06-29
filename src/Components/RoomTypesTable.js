@@ -89,20 +89,20 @@ const RoomTypesTable = ({ roomTypes }) => {
       title: 'Dịch vụ',
       render: (_, record) => (
         <Space style={{ display: 'flex', flexDirection: 'column' }}>
-          {record.haveFreeDrinkWater && <span>Free Drink Water</span>}
-          {record.haveMiniBar && <span>Mini Bar</span>}
-          {record.haveClothesHanger && <span>Clothes Hanger</span>}
-          {record.haveClosets && <span>Closets</span>}
-          {record.haveBathtubAndShower && <span>Bathtub & Shower</span>}
-          {record.haveAirConditioner && <span>Air Conditioner</span>}
-          {record.haveBalcony && <span>Balcony</span>}
-          {record.haveTvScreen && <span>TV Screen</span>}
-          {record.haveFreeWifi && <span>Free Wifi</span>}
-          {record.haveNoSmoking && <span>No Smoking</span>}
-          {record.haveFreeBreakfast && <span>Free Breakfast</span>}
-          {record.haveFreeCleaningRoom && <span>Free Cleaning Room</span>}
-          {record.haveFreeLaundry && <span>Free Laundry</span>}
-          {record.haveNiceView && <span>Nice View</span>}
+          {record.haveFreeDrinkWater && <span>Miễn phí suối</span>}
+          {record.haveMiniBar && <span>Có mini bar</span>}
+          {record.haveClothesHanger && <span>Móc quần áo</span>}
+          {record.haveClosets && <span>Tủ quần áo</span>}
+          {record.haveBathtubAndShower && <span>Bồn tắm và vòi sen</span>}
+          {record.haveAirConditioner && <span>Máy lạnh</span>}
+          {record.haveBalcony && <span>Ban côngg</span>}
+          {record.haveTvScreen && <span>Màn hình TV lớn</span>}
+          {record.haveFreeWifi && <span>Miễn phí Wifi</span>}
+          {record.haveNoSmoking && <span>Không hút thuốc</span>}
+          {record.haveFreeBreakfast && <span>Miễn phí buổi sáng</span>}
+          {record.haveFreeCleaningRoom && <span>Dọn phòng mỗi ngày</span>}
+          {record.haveFreeLaundry && <span>Miễn phí giặt ủi</span>}
+          {record.haveNiceView && <span>Có view đẹp</span>}
         </Space>
       ),
     },
