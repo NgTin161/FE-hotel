@@ -220,7 +220,7 @@ const Details = () => {
 
                         <h3>Phòng trống</h3>
                         <div className='container' style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '70px' }}>
-                            <div className='containerSearch' style={{ width: '800px' }}>
+                            <div className='containerSearch' style={{ width: '800px', marginTop:0, marginBottom:0,marginLeft:0, }}>
                                 <div style={{ marginTop: 20 }}>
                                     <RangePicker
                                         value={

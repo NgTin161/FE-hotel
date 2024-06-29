@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
-import { AutoComplete, DatePicker, Dropdown, InputNumber, Menu, Select, Table, Slider, Checkbox, Button as AntButton, Row, Col, message, Button, Typography, Form, Card } from 'antd';
+import { AutoComplete, DatePicker, Dropdown, InputNumber, Menu, Select, Table, Slider, Checkbox, Button as AntButton, Row, Col, message, Button, Typography, Form, Card, Rate } from 'antd';
 import { GlobalOutlined, SearchOutlined, UserOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { Option } from 'antd/es/mentions';
@@ -303,15 +303,13 @@ const HotelFilter = () => {
                 </div>
             </div>
             <div className='container-filterList'>
-                <div className="filter-sidebar" style={{ height: 650, width: 340, }}>
-
-                    <button className='clear-button ' >X</button>
+                <div className="filter-sidebarLeft" style={{ width: 340, }}>
 
                     <div className='map-filter' style={{ marginBottom: -70, }}>
                         <Map hotelData={hotelData} />
                     </div>
 
-                    <div style={{ padding: '10px', marginTop: 0 }}>
+                    <div style={{ padding: '10px', top: 60 }}>
                         <p style={{ fontWeight: 'bold', color: 'black' }}>Giá tiền của bạn</p>
                         <Slider
                             range
@@ -369,14 +367,31 @@ const HotelFilter = () => {
                                         }),
                                     }}
                                 >
-                                    <Card title={hotel.name}>
-                                        <p>Giá: {hotel.price.toLocaleString()} VND</p>
-                                        <p>Số sao: {hotel.ratingStarts}</p>
-                                        <p>Chấp nhận trẻ em: {hotel.acceptChildren ? 'Có' : 'Không'}</p>
-                                        <p>Chấp nhận thú cưng: {hotel.acceptPet ? 'Có' : 'Không'}</p>
-                                        <p>Hỗ trợ người khuyết tật: {hotel.supportPeopleWithDisabilities ? 'Có' : 'Không'}</p>
-                                        <p>Có thang máy: {hotel.haveElevator ? 'Có' : 'Không'}</p>
-                                        <p>Có hồ bơi: {hotel.haveSwimmingPool ? 'Có' : 'Không'}</p>
+                                    <Card title={hotel.hotelName} style={{ width: 900, }}>
+                                        {/* <p>Số sao: {hotel.ratingStarts}</p> */}
+                                        <p> <Rate disabled defaultValue={hotel.ratingStarts} /></p>
+
+                                        <p><i class="fa-solid fa-map-location-dot" ></i> {hotel.address}</p>
+                                        <div className='CardFilterBox'>
+                                            <div className='CardFilterLeft'>
+                                                <li>
+                                                    <p>Chấp nhận trẻ em: {hotel.acceptChildren ? 'Có' : 'Không'}</p>
+
+                                                </li>
+                                                <li><p>Chấp nhận thú cưng: {hotel.acceptPet ? 'Có' : 'Không'}</p>
+                                                </li>
+                                                <li><p>Hỗ trợ người khuyết tật: {hotel.supportPeopleWithDisabilities ? 'Có' : 'Không'}</p>
+                                                </li>
+                                                <li><p>Có thang máy: {hotel.haveElevator ? 'Có' : 'Không'}</p>
+                                                </li>
+                                                <li><p>Có hồ bơi: {hotel.haveSwimmingPool ? 'Có' : 'Không'}</p>
+                                                </li>
+                                            </div>
+                                            <div className='CardFilterBoxRight'>
+                                                <p>Giá: {hotel.price.toLocaleString()} VND</p>
+
+                                            </div>
+                                        </div>
                                     </Card>
                                 </Link>
                             </Col>
