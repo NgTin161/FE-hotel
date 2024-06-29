@@ -27,6 +27,7 @@ import PrivateRoute from './axios/PrivateRoute';
 import FogotPass from './user/FogotPass';
 import ConfirmPass from './user/ConfirmPass';
 import { AuthProvider } from './axios/AuthContext';
+import HistoryBooking from './user/HistoryBooking';
 
 function App() {
 
@@ -64,6 +65,7 @@ function App() {
                 <Route path="/Review" element={<Review />}></Route>
                 <Route path="/forgotpassword" element={<FogotPass />}></Route>
                 <Route path="/resetpassword" element={<ConfirmPass />}></Route>
+                <Route path="/HistoryBooking" element={<HistoryBooking />}></Route>
 
                 <Route path="*" element={<NotFound />}></Route>
             </Routes >

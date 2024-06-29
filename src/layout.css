@@ -1360,14 +1360,16 @@ th {
 
 }
 
+
 /***************************************************    FILTER KHÁCH SẠN     ********************************/
+
 .containerFilter {
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-start;
     gap: 20px;
     padding: 20px;
-    background-color: #f9f9f9;
+    background-color: #e0dcdc;
     border: 1px solid #e1e1e1;
     border-radius: 10px;
     max-width: 1200px;
@@ -1386,7 +1388,7 @@ th {
 
 /* Sidebar Container */
 .filter-sidebarLeft {
-    height: 1050px;
+    height: 1100px;
     width: 340px;
     display: flex;
     flex-direction: column;
@@ -1431,11 +1433,12 @@ th {
     color: black;
     margin: 10px 0 5px;
 }
-
-.checkbox-section .checkbox-item {
-    margin-bottom: 5px;
+.ant-form-item-control-input{
+    margin-bottom: -20px;
 }
-
+.cardFiltercontainer{
+    border-radius: 20px;
+}
 /* Rating Stars Section */
 .rating-stars-section p {
     font-weight: bold;
@@ -1466,10 +1469,12 @@ th {
     padding-left: 20px;
     color: #222;
 }
+
 .CardFilterLeft {
-    
+
     padding-left: 30px;
 }
+
 .CardFilterBoxRight {
     display: flex;
     justify-content: center;
@@ -1484,4 +1489,117 @@ th {
     margin: 0;
     font-weight: bold;
 }
-/*** sao  **/
+
+
+
+
+
+.ant-card-body {
+    height: 550px;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 400px 400px;
+    grid-template-rows: 400px 550px;
+}
+
+.image-container {
+    width: 100%;
+    /* Chiều rộng của div */
+    height: 137%;
+    /* Chiều cao của div */
+    overflow: hidden;
+    margin-top: -22px;
+    border-radius: 20px;
+}
+
+.image-container img {
+    width: 100%;
+    /* Chiều rộng của ảnh sẽ bằng chiều rộng của div */
+    height: 100%;
+    /* Chiều cao của ảnh sẽ bằng chiều cao của div */
+    object-fit: cover;
+}
+
+.selectFilter {
+    justify-content: center;
+    text-align: center;
+}
+
+/****************************************************************       HISTORY BOOKING ************************************************/
+.containerHistory {
+    width: 90%;
+    margin: 90px auto;
+}
+
+.headerHistory {
+    background-color: #f7f7f7;
+    padding: 20px 0;
+    text-align: center;
+}
+
+.searchHistory {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.searchHistory input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 300px;
+}
+
+.searchHistory button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.tableHistory {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.tableHistory tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+    text-align: left;
+
+}
+
+.tableHistory tr {
+
+    text-align: left;
+    border: 1px solid #ccc;
+}
+
+.tableHistory th {
+    background-color: #f2f2f2;
+    text-align: left;
+    padding: 8px;
+    border: 1px solid #ccc;
+}
+
+.paginationHistory {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.paginationHistory button {
+    padding: 10px 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 0 5px;
+}
+
+.paginationHistory button.active {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+}
+
+/****************************************************************/

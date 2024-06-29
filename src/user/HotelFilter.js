@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
-import { AutoComplete, DatePicker, Dropdown, InputNumber, Menu, Select, Table, Slider, Checkbox, Button as AntButton, Row, Col, message, Button, Typography, Form, Card, Rate } from 'antd';
+import { AutoComplete, DatePicker, Dropdown, InputNumber, Menu, Select, Table, Slider, Checkbox, Button as AntButton, Row, Col, message, Button, Typography, Form, Card, Rate, Flex } from 'antd';
 import { GlobalOutlined, SearchOutlined, UserOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { Option } from 'antd/es/mentions';
@@ -199,7 +199,13 @@ const HotelFilter = () => {
     const handleDone = () => {
         setShowDropdown(false); // Đóng dropdown khi hoàn thành nhập liệu
     };
+
     const [loading, setLoading] = useState(false);
+
+    /* XẾP GIÁ TIỀN */
+    const handleChange = (value) => {
+        console.log(`selected ${value}`);
+    };
     return (
         <>
             <div className='row' style={{ top: '-60px' }}>
@@ -308,9 +314,38 @@ const HotelFilter = () => {
                     <div className='map-filter' style={{ marginBottom: -70, }}>
                         <Map hotelData={hotelData} />
                     </div>
+                    <div className='selectFilter'>
+                        <Select
+                            defaultValue="chọn"
+                            style={{
+                                width: 200,
+                                marginTop:80,
+                            }}
+                            onChange={handleChange}
+                            options={[
+                                {
+                                    label: <span>manager</span>,
+                                    title: 'manager',
+                                    options: [
+                                        {
+                                            label: <span>Xếp theo giá cao nhất</span>,
+                                            value: 'Jack',
+                                        },
+                                        {
+                                            label: <span>Xếp theo giá thấp nhất</span>,
+                                            value: 'Lucy',
+                                        },
+                                    ],
+                                },
+                                
+                            ]}
+                        />
 
-                    <div style={{ padding: '10px', top: 60 }}>
-                        <p style={{ fontWeight: 'bold', color: 'black' }}>Giá tiền của bạn</p>
+
+                        
+                    </div>
+                    <div style={{ padding: '10px', top: 10 }}>
+                        <p style={{ fontWeight: 'bold', color: 'black' }}>Giá tiền của bạn từ</p>
                         <Slider
                             range
                             value={priceRange}
@@ -320,6 +355,8 @@ const HotelFilter = () => {
                             max={2000000}
                         />
                         <hr></hr>
+
+
                         <Typography variant="body" color="textSecondary">Từ: {priceRange[0].toLocaleString()} VND - Đến: {priceRange[1].toLocaleString()} VND</Typography>
                         <p style={{ fontWeight: 'bold', color: 'black' }}>Dịch vụ chung của khách sạn:</p>
                         <Checkbox name="acceptChildren" checked={filters.acceptChildren} onChange={handleFilterChange} >Chấp nhận trẻ em</Checkbox>
@@ -351,54 +388,59 @@ const HotelFilter = () => {
                         {checkoutDate ? moment(checkoutDate).format('DD-MM-YY') : 'không có ngày'}
                     </h3>
 
-                    {filteredHotels?.length > 0 ? (
-                        filteredHotels?.map((hotel) => (
-                            <Col key={hotel.id} span={8}>
-                                <Link
-                                    to={{
-                                        pathname: `/detail/${hotel.id}`,
-                                        search: queryString.stringify({
-                                            checkinDate: checkinDate,
-                                            checkoutDate: checkoutDate,
-                                            numberOfAdults: adults,
-                                            numberOfChildren: children,
-                                            numberOfRooms: rooms
-                                            // Add more query parameters as needed
-                                        }),
-                                    }}
-                                >
-                                    <Card title={hotel.hotelName} style={{ width: 900, }}>
-                                        {/* <p>Số sao: {hotel.ratingStarts}</p> */}
-                                        <p> <Rate disabled defaultValue={hotel.ratingStarts} /></p>
+                    <div  >
+                        {filteredHotels?.length > 0 ? (
+                            filteredHotels?.map((hotel) => (
+                                <Col key={hotel.id} span={8} >
+                                    <Link
+                                        to={{
+                                            pathname: `/detail/${hotel.id}`,
+                                            search: queryString.stringify({
+                                                checkinDate: checkinDate,
+                                                checkoutDate: checkoutDate,
+                                                numberOfAdults: adults,
+                                                numberOfChildren: children,
+                                                numberOfRooms: rooms
+                                                // Add more query parameters as needed
+                                            }),
+                                        }}
+                                    >
 
-                                        <p><i class="fa-solid fa-map-location-dot" ></i> {hotel.address}</p>
-                                        <div className='CardFilterBox'>
-                                            <div className='CardFilterLeft'>
-                                                <li>
-                                                    <p>Chấp nhận trẻ em: {hotel.acceptChildren ? 'Có' : 'Không'}</p>
-
-                                                </li>
-                                                <li><p>Chấp nhận thú cưng: {hotel.acceptPet ? 'Có' : 'Không'}</p>
-                                                </li>
-                                                <li><p>Hỗ trợ người khuyết tật: {hotel.supportPeopleWithDisabilities ? 'Có' : 'Không'}</p>
-                                                </li>
-                                                <li><p>Có thang máy: {hotel.haveElevator ? 'Có' : 'Không'}</p>
-                                                </li>
-                                                <li><p>Có hồ bơi: {hotel.haveSwimmingPool ? 'Có' : 'Không'}</p>
-                                                </li>
+                                        <Card className='cardFiltercontainer' style={{ width: 825,marginBottom:20, }}>
+                                            <div className='image-container'>
+                                                <img src='../asset/images/luxury.jpg' />
                                             </div>
-                                            <div className='CardFilterBoxRight'>
-                                                <p>Giá: {hotel.price.toLocaleString()} VND</p>
-
+                                            <div className='' style={{ marginTop: -400, }} >
+                                                <p style={{ fontSize: 30, color: 'black', fontWeight: 'bold' }}>{hotel.hotelName}</p>
+                                                <p> <Rate disabled defaultValue={hotel.ratingStarts} /></p>
+                                                <p><i className="fa-solid fa-map-location-dot"></i> {hotel.address}</p>
+                                                <div className='CardFilterBox'>
+                                                    <div className='CardFilterLeft'>
+                                                        <li>
+                                                            <p>Chấp nhận trẻ em: {hotel.acceptChildren ? 'Có' : 'Không'}</p>
+                                                        </li>
+                                                        <li><p>Chấp nhận thú cưng: {hotel.acceptPet ? 'Có' : 'Không'}</p></li>
+                                                        <li><p>Hỗ trợ người khuyết tật: {hotel.supportPeopleWithDisabilities ? 'Có' : 'Không'}</p></li>
+                                                        <li><p>Có thang máy: {hotel.haveElevator ? 'Có' : 'Không'}</p></li>
+                                                        <li><p>Có hồ bơi: {hotel.haveSwimmingPool ? 'Có' : 'Không'}</p></li>
+                                                    </div>
+                                                    <div className='CardFilterBoxRight'>
+                                                        <p>Giá: {hotel.price.toLocaleString()} VND</p>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </Card>
-                                </Link>
-                            </Col>
-                        ))
-                    ) : (
-                        <SpinComponents />
-                    )}
+                                        </Card>
+
+
+                                    </Link>
+                                </Col>
+                            ))
+                        ) : (
+                                <SpinComponents />
+                                
+                        )}
+
+                    </div>
 
 
 
